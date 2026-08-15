@@ -191,17 +191,6 @@ An alert should appear on the dashboard's Live Alerts view within seconds.
 - Internal project directories (`backups`, `.git`, `node_modules`, `venv`, `quarantine_storage`) are automatically excluded from monitoring to prevent feedback loops.
 - Built strictly for educational and defensive security purposes. Contains no code capable of causing harm.
 
-<br>
-
-## Roadmap
-
-- Lock all API routes behind JWT authentication
-- Windows-specific containment: Firewall isolation, Volume Shadow Copy checks
-- Expand the YARA rule set with community ransomware signatures
-- Role-based access control for multi-analyst use
-
-<br>
-
 ## License
 
 Released under the [MIT License](LICENSE).
