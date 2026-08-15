@@ -4,7 +4,7 @@
 
 **Behavioral Ransomware Detection, Containment & Automated Recovery Platform**
 
-![alt text](<Screenshot 2026-08-15 231058.png>)
+![alt text](<Screenshot 2026-08-15 231058-1.png>)
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
