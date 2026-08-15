@@ -4,7 +4,7 @@
 
 **Behavioral Ransomware Detection, Containment & Automated Recovery Platform**
 
-![alt text](<Screenshot 2026-08-15 231058-1.png>)
+![RansomGuard Dashboard](docs/screenshot-overview.png)
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -21,23 +21,23 @@
 
 ## Overview
 
-RansomGuard is a self-hosted, local-first EDR (Endpoint Detection & Response) system that detects ransomware through **behavioral analysis** rather than signature matching. It watches file-system and process activity in real time, scores that behavior against a weighted detection engine, maps confirmed threats to MITRE ATT&CK techniques, and — depending on the configured mode — automatically contains the responsible process, quarantines its executable, and restores affected files from backup. Every stage of that pipeline is visible live on a dedicated SOC-style dashboard.
+RansomGuard is a self-hosted, local-first EDR (Endpoint Detection & Response) system that detects ransomware through **behavioral analysis** rather than signature matching. It watches file-system and process activity in real time, scores that behavior against a weighted detection engine, maps confirmed threats to MITRE ATT&CK techniques, and, depending on the configured mode, automatically contains the responsible process, quarantines its executable, and restores affected files from backup. Every stage of that pipeline is visible live on a dedicated SOC-style dashboard.
 
-This is an educational, defensive-security project. It contains no exploit code, malware, or offensive tooling of any kind — only detection and response logic, exercised against simulated ransomware *behavior* (rapid renaming, high-entropy writes) inside an isolated test environment.
+This is an educational, defensive-security project. It contains no exploit code, malware, or offensive tooling of any kind, only detection and response logic, exercised against simulated ransomware *behavior* (rapid renaming, high-entropy writes) inside an isolated test environment.
 
-> **Runs entirely on your own machine.** There is no hosted or cloud version — RansomGuard is a local security tool you run and operate yourself, described below.
+**Runs entirely on your own machine.** There is no hosted or cloud version. RansomGuard is a local security tool you run and operate yourself, described in the Setup section below.
 
 <br>
 
 ## Why This Project
 
-Most portfolio security projects are static — a scanner you run once, a checklist. RansomGuard is a continuously running system that demonstrates:
+Most portfolio security projects are static, a scanner you run once, a checklist. RansomGuard is a continuously running system that demonstrates:
 
-- **Behavioral detection engineering** — weighted, multi-signal scoring instead of brittle signature matching
-- **End-to-end incident response** — detect, contain, and recover automatically, not just alert
-- **Threat intelligence integration** — VirusTotal hash reputation and YARA pattern rules
-- **MITRE ATT&CK mapping** — every alert tagged to a real technique ID
-- **Operational SOC tooling** — a live, WebSocket-driven dashboard built the way an analyst would actually use one
+- **Behavioral detection engineering** using weighted, multi-signal scoring instead of brittle signature matching
+- **End-to-end incident response** that detects, contains, and recovers automatically, not just alerts
+- **Threat intelligence integration** through VirusTotal hash reputation and YARA pattern rules
+- **MITRE ATT&CK mapping**, with every alert tagged to a real technique ID
+- **Operational SOC tooling**, a live, WebSocket-driven dashboard built the way an analyst would actually use one
 
 <br>
 
@@ -46,7 +46,7 @@ Most portfolio security projects are static — a scanner you run once, a checkl
 | Category | Capability |
 |---|---|
 | File monitoring | Real-time create/modify/rename/delete tracking via `watchdog` |
-| Process monitoring | Tracks running processes — PID, parent, hash, CPU/memory — via `psutil` |
+| Process monitoring | Tracks running processes, including PID, parent, hash, CPU/memory, via `psutil` |
 | Entropy detection | Flags encrypted-looking content (Shannon entropy ≥ 7.5) |
 | Canary files | Deploys decoy documents (`passwords.docx`, `salary.xlsx`); any access is treated as a high-confidence signal |
 | Weighted risk engine | Combines every signal into a single score; confirmed ransomware at score ≥ 80 |
@@ -57,7 +57,7 @@ Most portfolio security projects are static — a scanner you run once, a checkl
 | Process containment & quarantine | Kills malicious processes and isolates their executables |
 | IOC search / threat hunting | Search recorded hashes, filenames, and paths across the full event history |
 | PDF incident reports | One-click, analyst-style report generation per incident |
-| Live dashboard | Alerts, timeline, MITRE matrix, and quarantine state — all updated over WebSocket |
+| Live dashboard | Alerts, timeline, MITRE matrix, and quarantine state, all updated over WebSocket |
 | Simulation Mode | A safety switch: detect and alert without ever killing, quarantining, or restoring anything for real |
 
 <br>
@@ -91,7 +91,7 @@ Most portfolio security projects are static — a scanner you run once, a checkl
                     └───────────────┘
 ```
 
-**Detection pipeline:** file/process event → signal extraction (entropy, extension, canary hit, hash reputation, YARA match) → weighted score → MITRE technique mapping → alert (and incident, if score ≥ 80) → response (restore/contain, or simulated) → broadcast to the dashboard in real time.
+**Detection pipeline:** a file or process event triggers signal extraction (entropy, extension, canary hit, hash reputation, YARA match), which feeds a weighted score, which is mapped to MITRE techniques, which produces an alert (and an incident, if score ≥ 80), which triggers a response (restore/contain, or simulated), which is broadcast to the dashboard in real time.
 
 <br>
 
@@ -109,9 +109,9 @@ Most portfolio security projects are static — a scanner you run once, a checkl
 
 RansomGuard has three moving parts that all run on your own machine, side by side, every time you use it:
 
-1. **Docker containers** — MySQL and Redis, providing persistence and caching
-2. **Backend** — a FastAPI process that runs the file watcher, process watcher, and detection engine
-3. **Frontend** — a Vite dev server serving the React dashboard in your browser
+1. **Docker containers** providing MySQL and Redis for persistence and caching
+2. **Backend**, a FastAPI process that runs the file watcher, process watcher, and detection engine
+3. **Frontend**, a Vite dev server serving the React dashboard in your browser
 
 All three need to be running at the same time for the system to work. Closing any of them stops that part of the pipeline; starting them again resumes monitoring from where the database left off.
 
@@ -135,9 +135,9 @@ cd RansomGuard-Behavioral-Ransomware-Detection-And-Response-System
 cp .env.example backend/.env
 ```
 Then edit `backend/.env`:
-- Add a free [VirusTotal API key](https://www.virustotal.com/gui/join-us) to enable hash reputation lookups (optional — lookups are simply skipped without one)
+- Add a free [VirusTotal API key](https://www.virustotal.com/gui/join-us) to enable hash reputation lookups (optional; lookups are simply skipped without one)
 - Set `WATCH_FOLDERS` to the folder(s) you want monitored
-- Leave `SIMULATION_MODE=true` until you've validated the detection engine — this prevents any real process kill, quarantine, or file restore from happening
+- Leave `SIMULATION_MODE=true` until you've validated the detection engine. This prevents any real process kill, quarantine, or file restore from happening.
 
 ### 3. Start the database layer
 ```bash
@@ -165,7 +165,7 @@ npm run dev
 This starts the dashboard.
 
 ### 6. Trigger a safe test detection
-This simulates ransomware *behavior* only — no real malicious code — to confirm the pipeline works end to end:
+This simulates ransomware *behavior* only, no real malicious code, to confirm the pipeline works end to end:
 ```bash
 cd backend/test_folder
 for i in $(seq 1 20); do echo "test data $i" > file$i.txt; mv file$i.txt file$i.locked; done
@@ -196,7 +196,7 @@ An alert should appear on the dashboard's Live Alerts view within seconds.
 
 ## Safety Design
 
-- **`SIMULATION_MODE=true` by default** — the system detects and alerts, but never kills a process, quarantines a file, or restores anything for real, until this is explicitly disabled.
+- **`SIMULATION_MODE=true` by default.** The system detects and alerts, but never kills a process, quarantines a file, or restores anything for real, until this is explicitly disabled.
 - Internal project directories (`backups`, `.git`, `node_modules`, `venv`, `quarantine_storage`) are automatically excluded from monitoring to prevent feedback loops.
 - Built strictly for educational and defensive security purposes. Contains no code capable of causing harm.
 
