@@ -1,0 +1,179 @@
+:root {
+  --bg: #070b14;
+  --bg-panel: #0d1424;
+  --bg-panel-hover: #121b30;
+  --border: #1b2740;
+  --border-soft: #16203a;
+
+  --blue-500: #3b82f6;
+  --blue-400: #60a5fa;
+  --blue-300: #93c5fd;
+  --blue-glow: rgba(59, 130, 246, 0.35);
+
+  --text-primary: #e7ecf7;
+  --text-secondary: #8ea0c2;
+  --text-muted: #5c6c8a;
+
+  --critical: #f43f5e;
+  --high: #f59e0b;
+  --medium: #eab308;
+  --low: #22c55e;
+  --safe: #34d399;
+
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: radial-gradient(circle at 15% -10%, #0d1c3a 0%, var(--bg) 45%);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--blue-500); }
+
+.mono { font-family: var(--font-mono); }
+
+.card {
+  background: linear-gradient(180deg, var(--bg-panel) 0%, rgba(13, 20, 36, 0.6) 100%);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.card-glow {
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.08), 0 8px 24px -8px rgba(59, 130, 246, 0.15);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.badge-critical { background: rgba(244, 63, 94, 0.12); color: var(--critical); border: 1px solid rgba(244, 63, 94, 0.3); }
+.badge-high { background: rgba(245, 158, 11, 0.12); color: var(--high); border: 1px solid rgba(245, 158, 11, 0.3); }
+.badge-medium { background: rgba(234, 179, 8, 0.12); color: var(--medium); border: 1px solid rgba(234, 179, 8, 0.3); }
+.badge-low { background: rgba(34, 197, 94, 0.12); color: var(--low); border: 1px solid rgba(34, 197, 94, 0.3); }
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--safe);
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table.data-table thead th {
+  text-align: left;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+table.data-table tbody td {
+  padding: 0.75rem 0.9rem;
+  font-size: 0.87rem;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-secondary);
+}
+
+table.data-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+table.data-table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.truncate-path {
+  display: block;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1400px) {
+  .truncate-path { max-width: 260px; }
+}
+
+button.btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-panel-hover);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+button.btn:hover {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px var(--blue-glow);
+}
+
+button.btn-primary {
+  background: linear-gradient(135deg, var(--blue-500), #2563eb);
+  border: none;
+  color: white;
+}
+
+input.input {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+}
+
+input.input:focus {
+  outline: none;
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px var(--blue-glow);
+}

@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: ransomguard_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ransomguard_root_password
+      MYSQL_USER: ransomguard
+      MYSQL_PASSWORD: ransomguard_dev_password
+      MYSQL_DATABASE: ransomguard
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pransomguard_root_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: ransomguard_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  mysqldata:
