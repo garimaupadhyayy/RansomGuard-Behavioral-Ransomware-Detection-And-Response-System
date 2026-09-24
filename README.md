@@ -8,195 +8,105 @@
 
 </div>
 
-<br>
-
 ## Overview
 
-RansomGuard is a self-hosted, local-first EDR (Endpoint Detection & Response) system that detects ransomware through **behavioral analysis** rather than signature matching. It watches file-system and process activity in real time, scores that behavior against a weighted detection engine, maps confirmed threats to MITRE ATT&CK techniques, and, depending on the configured mode, automatically contains the responsible process, quarantines its executable, and restores affected files from backup. Every stage of that pipeline is visible live on a dedicated SOC-style dashboard.
+RansomGuard is a self-hosted, local-first EDR (Endpoint Detection & Response) system designed to protect files and endpoint activity from ransomware through **behavioral analysis** rather than signature matching.
 
-This is an educational, defensive-security project. It contains no exploit code, malware, or offensive tooling of any kind, only detection and response logic, exercised against simulated ransomware *behavior* (rapid renaming, high-entropy writes) inside an isolated test environment.
+The system continuously monitors file-system and process activity, evaluates multiple security signals through a weighted risk engine, maps confirmed threats to MITRE ATT&CK techniques, and supports automated containment, quarantine, and file recovery. All detection and response activity is presented through a real-time SOC-style dashboard.
 
-**Runs entirely on your own machine.** There is no hosted or cloud version. RansomGuard is a local security tool you run and operate yourself, described in the Setup section below.
-
-<br>
-
-## Why This Project
-
-Most portfolio security projects are static, a scanner you run once, a checklist. RansomGuard is a continuously running system that demonstrates:
-
-- **Behavioral detection engineering** using weighted, multi-signal scoring instead of brittle signature matching
-- **End-to-end incident response** that detects, contains, and recovers automatically, not just alerts
-- **Threat intelligence integration** through VirusTotal hash reputation and YARA pattern rules
-- **MITRE ATT&CK mapping**, with every alert tagged to a real technique ID
-- **Operational SOC tooling**, a live, WebSocket-driven dashboard built the way an analyst would actually use one
+RansomGuard is designed as an educational defensive-security project and operates entirely on the local machine. It uses simulated ransomware behavior in an isolated test environment and contains no exploit code, malware, or offensive tooling.
 
 <br>
 
-## Features
+## Key Highlights
 
-| Category | Capability |
+- **Behavior-based ransomware detection** using multi-signal risk scoring
+- **80+ risk score** threshold for confirmed ransomware incidents
+- **70+ antivirus engines** through VirusTotal hash reputation
+- **5 MITRE ATT&CK techniques** mapped across detected threats
+- Real-time monitoring of files and processes
+- Automated **containment, quarantine, and file recovery**
+- **Canary files, YARA, entropy analysis, and hash reputation** for layered detection
+- IOC search and threat-hunting capabilities
+- Real-time SOC dashboard with WebSocket alerts
+- PDF incident reporting
+
+<br>
+
+## Problem Statement
+
+Traditional signature-based security tools may fail to identify previously unseen ransomware behavior. Ransomware can begin encrypting or modifying files before a known signature becomes available.
+
+RansomGuard addresses this challenge by monitoring **behavioral indicators** such as:
+
+- Rapid file modifications and renaming
+- High-entropy file writes
+- Access to protected canary files
+- Suspicious process activity
+- YARA rule matches
+- Malicious or suspicious file-hash reputation
+- Anti-recovery behavior
+
+These signals are combined into a weighted risk score to support faster threat identification and response.
+
+<br>
+
+## Core Features
+
+### Behavioral Threat Detection
+
+RansomGuard continuously monitors endpoint activity instead of relying only on known malware signatures.
+
+- Real-time file creation, modification, rename, and deletion monitoring
+- Running-process monitoring
+- Shannon entropy analysis for encrypted-looking content
+- Canary-file monitoring
+- YARA-based pattern detection
+- SHA-256 hash reputation through VirusTotal
+
+### Risk Assessment
+
+Multiple security signals are combined into a weighted detection score.
+
+| Signal | Purpose |
 |---|---|
-| File monitoring | Real-time create/modify/rename/delete tracking via `watchdog` |
-| Process monitoring | Tracks running processes, including PID, parent, hash, CPU/memory, via `psutil` |
-| Entropy detection | Flags encrypted-looking content (Shannon entropy ≥ 7.5) |
-| Canary files | Deploys decoy documents (`passwords.docx`, `salary.xlsx`); any access is treated as a high-confidence signal |
-| Weighted risk engine | Combines every signal into a single score; confirmed ransomware at score ≥ 80 |
-| MITRE ATT&CK mapping | Every alert tagged with matching technique IDs (T1486, T1490, T1083, T1057, T1105) |
-| VirusTotal integration | SHA-256 hash lookups against 70+ antivirus engines |
-| YARA rule scanning | Pattern-based detection for ransom-note text and anti-recovery commands |
-| Scheduled backup & recovery | Periodic snapshots of watched folders; automatic restore on confirmed detection |
-| Process containment & quarantine | Kills malicious processes and isolates their executables |
-| IOC search / threat hunting | Search recorded hashes, filenames, and paths across the full event history |
-| PDF incident reports | One-click, analyst-style report generation per incident |
-| Live dashboard | Alerts, timeline, MITRE matrix, and quarantine state, all updated over WebSocket |
-| Simulation Mode | A safety switch: detect and alert without ever killing, quarantining, or restoring anything for real |
+| File Entropy | Identifies encrypted-looking content |
+| Canary Files | Detects suspicious access to protected decoy files |
+| File Behavior | Identifies rapid modification and rename activity |
+| Process Behavior | Detects suspicious process activity |
+| YARA | Detects ransomware-related patterns |
+| VirusTotal | Provides hash-based reputation information |
 
-<br>
+A score of **80 or higher** confirms ransomware according to the configured detection engine.
 
-## Architecture
+### Sensitive File Protection
 
-```
-                    ┌───────────────────────────┐
-                    │   React + TypeScript UI     │
-                    │   SOC Dashboard (Vite)      │
-                    └──────────────┬───────────────┘
-                                   │ REST + WebSocket
-                    ┌──────────────▼───────────────┐
-                    │        FastAPI Backend        │
-                    │  Detection Engine · MITRE      │
-                    │  Alerts · Backup · Restore     │
-                    │  Quarantine · Reports          │
-                    └──────┬─────────────────┬──────┘
-                           │                 │
-              ┌────────────▼───────┐ ┌───────▼────────────┐
-              │   File Watcher       │ │   Process Watcher    │
-              │   (watchdog)          │ │   (psutil)            │
-              │   entropy · YARA ·    │ │   hash reputation ·   │
-              │   canary files        │ │   containment         │
-              └───────────────────────┘ └───────────────────────┘
-                           │
-                    ┌──────▼──────┐
-                    │ MySQL + Redis │
-                    │ persistence /  │
-                    │ caching layer  │
-                    └───────────────┘
-```
+RansomGuard focuses on protecting monitored files from ransomware-driven modification and loss.
 
-**Detection pipeline:** a file or process event triggers signal extraction (entropy, extension, canary hit, hash reputation, YARA match), which feeds a weighted score, which is mapped to MITRE techniques, which produces an alert (and an incident, if score ≥ 80), which triggers a response (restore/contain, or simulated), which is broadcast to the dashboard in real time.
+- Monitors configured folders in real time
+- Detects suspicious file modifications
+- Uses canary documents as high-confidence indicators
+- Maintains scheduled backups of watched folders
+- Restores affected files after confirmed detection
 
-<br>
+### Incident Response
 
-## Tech Stack
+The platform supports an end-to-end detection and response workflow.
 
-| Layer | Technologies |
-|---|---|
-| Backend | Python, FastAPI, SQLAlchemy, MySQL, Redis, JWT auth, WebSockets, `watchdog`, `psutil`, `yara-python`, `reportlab` |
-| Frontend | React 18, TypeScript, Vite, Recharts, `lucide-react` |
-| Infrastructure | Docker Compose (MySQL + Redis) |
-
-<br>
-
-## How It Runs
-
-RansomGuard has three moving parts that all run on your own machine, side by side, every time you use it:
-
-1. **Docker containers** providing MySQL and Redis for persistence and caching
-2. **Backend**, a FastAPI process that runs the file watcher, process watcher, and detection engine
-3. **Frontend**, a Vite dev server serving the React dashboard in your browser
-
-All three need to be running at the same time for the system to work. Closing any of them stops that part of the pipeline; starting them again resumes monitoring from where the database left off.
-
-<br>
-
-## Setup
-
-### Prerequisites
-- Docker Desktop
-- Python 3.11+
-- Node.js 18+
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/garimaupadhyayy/RansomGuard-Behavioral-Ransomware-Detection-And-Response-System.git
-cd RansomGuard-Behavioral-Ransomware-Detection-And-Response-System
-```
-
-### 2. Configure environment variables
-```bash
-cp .env.example backend/.env
-```
-Then edit `backend/.env`:
-- Add a free [VirusTotal API key](https://www.virustotal.com/gui/join-us) to enable hash reputation lookups (optional; lookups are simply skipped without one)
-- Set `WATCH_FOLDERS` to the folder(s) you want monitored
-- Leave `SIMULATION_MODE=true` until you've validated the detection engine. This prevents any real process kill, quarantine, or file restore from happening.
-
-### 3. Start the database layer
-```bash
-docker compose up -d
-```
-This brings up MySQL and Redis in the background.
-
-### 4. Start the backend
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
-This starts the API server and both background watchers, and exposes interactive API documentation.
-
-### 5. Start the frontend
-In a separate terminal:
-```bash
-cd frontend
-npm install
-npm run dev
-```
-This starts the dashboard.
-
-### 6. Trigger a safe test detection
-This simulates ransomware *behavior* only, no real malicious code, to confirm the pipeline works end to end:
-```bash
-cd backend/test_folder
-for i in $(seq 1 20); do echo "test data $i" > file$i.txt; mv file$i.txt file$i.locked; done
-```
-An alert should appear on the dashboard's Live Alerts view within seconds.
-
-<br>
-
-## API Reference
-
-| Endpoint | Description |
-|---|---|
-| `GET /api/events/files` | Recent file events |
-| `GET /api/events/processes` | Recent process events |
-| `GET /api/alerts` | All triggered alerts |
-| `GET /api/incidents` | Confirmed incidents |
-| `GET /api/incidents/{id}/report` | Generate a PDF incident report |
-| `GET /api/quarantine` | Isolated files and processes |
-| `GET /api/ioc/search?q=` | Search hashes, filenames, and paths |
-| `GET /api/hunt/unsigned-processes` | Threat hunting: unknown processes |
-| `GET /api/hunt/script-hosts` | Threat hunting: PowerShell/CMD/WScript activity |
-| `GET /api/virustotal/lookup/{sha256}` | Manual VirusTotal hash check |
-| `GET /api/mitre/summary` | Alert counts per MITRE technique |
-| `POST /api/auth/register`, `/login` | Account creation and JWT token issuance |
-| `WS /api/ws/alerts` | Live alert stream |
-
-<br>
-
-## Safety Design
-
-- **`SIMULATION_MODE=true` by default.** The system detects and alerts, but never kills a process, quarantines a file, or restores anything for real, until this is explicitly disabled.
-- Internal project directories (`backups`, `.git`, `node_modules`, `venv`, `quarantine_storage`) are automatically excluded from monitoring to prevent feedback loops.
-- Built strictly for educational and defensive security purposes. Contains no code capable of causing harm.
-
-## License
-
-Released under the [MIT License](LICENSE).
-
-<br>
-
-<div align="center">
-<sub>A defensive security learning project. Not intended for production deployment without further hardening.</sub>
+```text
+Detect
+  ↓
+Risk Score
+  ↓
+Confirm Incident
+  ↓
+MITRE ATT&CK Mapping
+  ↓
+Contain Process
+  ↓
+Quarantine Executable
+  ↓
+Restore Affected Files
+  ↓
+Generate Incident Reportardening.</sub>
 </div>
