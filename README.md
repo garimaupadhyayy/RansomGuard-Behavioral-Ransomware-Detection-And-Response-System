@@ -10,103 +10,90 @@
 
 ## Overview
 
-RansomGuard is a self-hosted, local-first EDR (Endpoint Detection & Response) system designed to protect files and endpoint activity from ransomware through **behavioral analysis** rather than signature matching.
+RansomGuard is a self-hosted, local-first EDR (Endpoint Detection & Response) system designed to detect ransomware through **behavioral analysis** rather than signature matching.
 
-The system continuously monitors file-system and process activity, evaluates multiple security signals through a weighted risk engine, maps confirmed threats to MITRE ATT&CK techniques, and supports automated containment, quarantine, and file recovery. All detection and response activity is presented through a real-time SOC-style dashboard.
+It continuously monitors file-system and process activity, evaluates multiple security signals through a weighted detection engine, maps confirmed threats to MITRE ATT&CK techniques, and supports automated containment, quarantine, and file recovery. Detection and response activity is presented through a real-time SOC-style dashboard.
 
-RansomGuard is designed as an educational defensive-security project and operates entirely on the local machine. It uses simulated ransomware behavior in an isolated test environment and contains no exploit code, malware, or offensive tooling.
+This is an educational, defensive-security project. It contains no exploit code, malware, or offensive tooling. Testing is performed using simulated ransomware behavior such as rapid file renaming and high-entropy writes inside an isolated environment.
+
+**Runs entirely on your own machine.** There is no hosted or cloud version.
+
+<br>
+
+## Why This Project
+
+RansomGuard is designed to demonstrate a complete endpoint security workflow rather than a one-time security scan.
+
+It demonstrates:
+
+- **Behavioral detection engineering** using weighted, multi-signal scoring
+- **End-to-end incident response** from detection to containment and recovery
+- **Threat intelligence integration** through VirusTotal hash reputation and YARA rules
+- **MITRE ATT&CK mapping** for detected security activity
+- **SOC-style monitoring** through a real-time WebSocket dashboard
 
 <br>
 
 ## Key Highlights
 
-- **Behavior-based ransomware detection** using multi-signal risk scoring
-- **80+ risk score** threshold for confirmed ransomware incidents
+- Real-time file and process monitoring
+- Behavioral ransomware detection
+- Weighted risk scoring with **80+** confirmation threshold
 - **70+ antivirus engines** through VirusTotal hash reputation
-- **5 MITRE ATT&CK techniques** mapped across detected threats
-- Real-time monitoring of files and processes
-- Automated **containment, quarantine, and file recovery**
-- **Canary files, YARA, entropy analysis, and hash reputation** for layered detection
+- **5 MITRE ATT&CK techniques** mapped to detected threats
+- Entropy, YARA, canary-file and hash-based detection
+- Automated process containment and quarantine
+- Scheduled backup and file recovery
 - IOC search and threat-hunting capabilities
-- Real-time SOC dashboard with WebSocket alerts
+- Real-time SOC dashboard
 - PDF incident reporting
+- Safe Simulation Mode
 
 <br>
 
-## Problem Statement
+## Features
 
-Traditional signature-based security tools may fail to identify previously unseen ransomware behavior. Ransomware can begin encrypting or modifying files before a known signature becomes available.
-
-RansomGuard addresses this challenge by monitoring **behavioral indicators** such as:
-
-- Rapid file modifications and renaming
-- High-entropy file writes
-- Access to protected canary files
-- Suspicious process activity
-- YARA rule matches
-- Malicious or suspicious file-hash reputation
-- Anti-recovery behavior
-
-These signals are combined into a weighted risk score to support faster threat identification and response.
-
-<br>
-
-## Core Features
-
-### Behavioral Threat Detection
-
-RansomGuard continuously monitors endpoint activity instead of relying only on known malware signatures.
-
-- Real-time file creation, modification, rename, and deletion monitoring
-- Running-process monitoring
-- Shannon entropy analysis for encrypted-looking content
-- Canary-file monitoring
-- YARA-based pattern detection
-- SHA-256 hash reputation through VirusTotal
-
-### Risk Assessment
-
-Multiple security signals are combined into a weighted detection score.
-
-| Signal | Purpose |
+| Category | Capability |
 |---|---|
-| File Entropy | Identifies encrypted-looking content |
-| Canary Files | Detects suspicious access to protected decoy files |
-| File Behavior | Identifies rapid modification and rename activity |
-| Process Behavior | Detects suspicious process activity |
-| YARA | Detects ransomware-related patterns |
-| VirusTotal | Provides hash-based reputation information |
+| File monitoring | Real-time create/modify/rename/delete tracking via `watchdog` |
+| Process monitoring | Tracks running processes using `psutil` |
+| Entropy detection | Flags encrypted-looking content using Shannon entropy |
+| Canary files | Uses decoy documents as high-confidence ransomware indicators |
+| Weighted risk engine | Combines multiple signals into a single risk score |
+| MITRE ATT&CK mapping | Maps detected behavior to ATT&CK techniques |
+| VirusTotal integration | SHA-256 hash reputation across 70+ antivirus engines |
+| YARA scanning | Pattern-based detection for ransomware-related behavior |
+| Backup & recovery | Scheduled snapshots and recovery of monitored files |
+| Process containment | Contains suspicious processes |
+| Quarantine | Isolates suspicious executables |
+| IOC search | Searches hashes, filenames and paths |
+| Threat hunting | Searches suspicious processes and script-host activity |
+| PDF reports | Generates incident reports |
+| Live dashboard | Real-time alerts, timeline and MITRE visibility |
+| Simulation Mode | Detects and alerts without performing real response actions |
 
-A score of **80 or higher** confirms ransomware according to the configured detection engine.
+<br>
 
-### Sensitive File Protection
+## Detection & Risk Assessment
 
-RansomGuard focuses on protecting monitored files from ransomware-driven modification and loss.
-
-- Monitors configured folders in real time
-- Detects suspicious file modifications
-- Uses canary documents as high-confidence indicators
-- Maintains scheduled backups of watched folders
-- Restores affected files after confirmed detection
-
-### Incident Response
-
-The platform supports an end-to-end detection and response workflow.
+RansomGuard combines multiple behavioral indicators instead of depending on a single signature.
 
 ```text
-Detect
-  ↓
-Risk Score
-  ↓
-Confirm Incident
-  ↓
-MITRE ATT&CK Mapping
-  ↓
-Contain Process
-  ↓
-Quarantine Executable
-  ↓
-Restore Affected Files
-  ↓
-Generate Incident Reportardening.</sub>
-</div>
+File / Process Activity
+          ↓
+   Signal Extraction
+          ↓
+ ┌─────────────────────┐
+ │ Entropy Analysis    │
+ │ Canary File Hits    │
+ │ File Behavior       │
+ │ Process Behavior    │
+ │ YARA Detection      │
+ │ Hash Reputation     │
+ └──────────┬──────────┘
+            ↓
+     Weighted Risk Score
+            ↓
+     Score ≥ 80
+            ↓
+    Confirmed Incident
